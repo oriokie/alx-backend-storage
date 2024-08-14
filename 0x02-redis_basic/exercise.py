@@ -4,25 +4,26 @@ Using Redis NoSQL data storage
 """
 import uuid
 import redis
-from typing import Union
+from typing import Union, Callable, Any
 from functools import wraps
 
 
-def count_calls(method: callable) -> callable:
+def count_calls(method: Callable) -> Callable:
     """
     Decorator to count the number of times a function is called
     """
     @wraps(method)
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self, *args, **kwargs) -> Any:
         """
         Wrapper function that increments the count of the function
         """
-        self._redis.incr(method.__qualname__)
+        if isinstance(self._redis, redis.Redis):
+            self._redis.incr(method.__qualname__)
         return method(self, *args, **kwargs)
     return wrapper
 
 
-def call_history(method: callable) -> callable:
+def call_history(method: Callable) -> Callable:
     '''Tracks the call details of a method in a Cache class.
     '''
     @wraps(method)
